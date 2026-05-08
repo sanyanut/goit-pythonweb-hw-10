@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.schemas.users import UserModel, UserResponse, TokenModel, RequestEmail
+from src.schemas.users import UserModel, UserResponse, TokenModel, RefreshTokenModel, RequestEmail
 from src.services.users import UserService
 from src.services.auth import Hash, create_access_token, get_email_from_token, create_refresh_token, decode_refresh_token
 from src.services.email import send_email
@@ -37,12 +37,12 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     access_token = await create_access_token(data={"sub": user.email})
     refresh_token = await create_refresh_token(data={"sub": user.email})
     await user_service.update_token(user, refresh_token)
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"}
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 security = HTTPBearer()
 
-@router.get("/refresh_token", response_model=TokenModel)
+@router.get("/refresh_token", response_model=RefreshTokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(get_db)):
     token = credentials.credentials
     email = await decode_refresh_token(token)

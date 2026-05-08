@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Integer, String, Date, DateTime, func, Column, Boolean, ForeignKey
+from sqlalchemy import Integer, String, Date, DateTime, func, Column, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional
 
@@ -11,12 +11,15 @@ class Base(DeclarativeBase):
 
 class Contact(Base):
     __tablename__ = "contacts"
+    __table_args__ = (
+        UniqueConstraint("email", "user_id", name="uq_contact_email_per_user"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(50), index=True)
     phone: Mapped[str] = mapped_column(String(16))
 
     birth_date: Mapped[date] = mapped_column(Date)
